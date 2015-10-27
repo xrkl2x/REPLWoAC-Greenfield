@@ -14,6 +14,7 @@ module.exports = function(app, express){
   var userActionRouter = express.Router();
   var eventRouter = express.Router();
   var s3Router = express.Router();
+  var sendGridRouter = express.Router();
 
   // Define Middleware
   app.use(bodyParser.json({ limit : '50mb' }));
@@ -23,7 +24,7 @@ module.exports = function(app, express){
   // Define URL's
 
   app.use('/api/s3', s3Router); // use the userRouter for all user requests, note 
-
+  app.use('/api/sendGrid', sendGridRouter); // use the sendGridRouter for all user emails
   app.use('/api/user', userRouter); // use the userRouter for all user requests, note the '/api/user'
   
   app.use('/api/userAction', Utils.decode); // decode user token before proceeding any 
@@ -37,5 +38,5 @@ module.exports = function(app, express){
   require('../user/userRoute.js')(userRouter);
   require('../userAction/userActionRoute.js')(userActionRouter);
   require('../event/eventRoute.js')(eventRouter);
-
+  require('../sendGrid/sendGridRoute.js')(sendGridRouter);
 };

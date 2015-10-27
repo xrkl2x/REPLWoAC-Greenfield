@@ -2,6 +2,7 @@ angular.module('crash', [
   'crash.eventService',
   'crash.userService',
   'crash.S3',
+  'crash.sendGrid',
   'crash.crashEventObj',
   'crash.profile',
   'crash.createAccount',

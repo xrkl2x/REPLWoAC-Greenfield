@@ -1,6 +1,6 @@
 angular.module('crash.crashWitness', [])
 
-.controller('CrashWitnessController', function(CrashEventObj) {
+.controller('CrashWitnessController', function(CrashEventObj, SendGridService) {
   
   var self = this;
   self.witnessArr = [];
@@ -29,6 +29,10 @@ angular.module('crash.crashWitness', [])
   self.save = function(){
     console.log('saving...');
     CrashEventObj.crashEvent.witnessArr = self.witnessArr;
+  };
+
+  self.sendGrid = function(){
+    console.log('SEND GRID');
   };
 
 });
