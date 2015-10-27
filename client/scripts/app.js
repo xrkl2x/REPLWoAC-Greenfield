@@ -98,6 +98,14 @@ angular.module('crash', [
         authenticate : true  
       }
     })
+    .when('/authFacebook', {
+      templateUrl: 'scripts/modules/user/profile/profile.html',
+      controller: 'ProfileController',
+      controllerAs : 'profileCtrl',
+      data : {
+        authenticate : true  
+      }
+    })
     .otherwise( {
       redirectTo: '/'
     });
