@@ -38,7 +38,7 @@
     "q": "^1.4.1",
     "sendgrid": "^1.9.2",
     "passport": "^0.3.0",
-    "passport-facebook": "^2.0.0",
+    "passport-facebook": "^2.0.0"
   },
   "engines": {
     "node": "4.1.2"

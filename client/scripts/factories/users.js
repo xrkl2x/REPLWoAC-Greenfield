@@ -19,6 +19,21 @@ angular.module('crash.userService', [])
   };
 
   /***
+    url = 'api/user/signinFacebook' ($http send user obj) 
+    return from server
+      success or failure
+  ***/
+  var signinFacebook = function(){
+    return $http({
+      method : 'GET',
+      url : 'api/auth/facebook',
+    })
+    .then(function(res){
+      return res.data;
+    });
+  };
+
+  /***
     url = 'api/user/create' ($http send user obj)
     return from server : 
       success or failure 
@@ -99,6 +114,7 @@ angular.module('crash.userService', [])
 
   return {
     signin : signin,
+    signinFacebook: signinFacebook,
     createAccount : createAccount,
     updateUserAccount: updateUserAccount,
     readAccount : readAccount,

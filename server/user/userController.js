@@ -10,6 +10,10 @@ var User = require('./userModel.js');
     Utils = require('../config/utility.js');
     Q = require('q');
     jwt = require('jwt-simple');
+    express = require('express');
+    passport = require('passport');
+    FacebookStrategy = require('passport-facebook').Strategy;
+    session = require('express-session');
 
 module.exports = {
 
@@ -76,6 +80,10 @@ module.exports = {
         console.log('error signing the user in...', err);
         res.status(404).send({error : err.message});
       });
+  },
+
+  signinFacebook : function(req, res, next){
+    
   },
 
   createAccount : function(req, res, next) {

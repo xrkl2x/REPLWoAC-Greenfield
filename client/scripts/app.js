@@ -14,7 +14,8 @@ angular.module('crash', [
   'crash.crashDriverInfo',
   'crash.crashEmail',
   'crash.crashFinalInfo',
-  'ngRoute'
+  'ngRoute',
+  'ngCookies'
 ])
 .config(function($routeProvider, $httpProvider) {
 	$routeProvider

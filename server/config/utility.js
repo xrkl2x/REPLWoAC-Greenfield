@@ -11,8 +11,18 @@ var jwt = require('jwt-simple');
   Decode the token that was attached to the call's headers as 'x-access-token',
   then attach the decoded user object to the request object
 ***/
+var FACEBOOK_APP_ID = '727643380674076';
+var FACEBOOK_APP_SECRET = '82696b2b0432b1f59fbef854f6774854';  
 
 module.exports = {
+  // Passport authentication providers
+  auth: {
+    'facebookAuth' : {
+      clientID: FACEBOOK_APP_ID,
+      clientSecret: FACEBOOK_APP_SECRET,
+      callbackURL: "http://localhost:3000/auth/facebook/callback"
+    }
+  },
 
   decode : function(req, res, next){
     var token = req.headers['x-access-token'];
