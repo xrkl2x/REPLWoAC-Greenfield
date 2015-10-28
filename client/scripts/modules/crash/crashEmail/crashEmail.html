@@ -1,4 +1,5 @@
-<div id='crashEmail' ng-init="crashEmailCtrl.getUser()">
+<!-- <div id='crashEmail' ng-init="crashEmailCtrl.getUser()"> -->
+<div id='crashEmail'>
 
   <h1>Step 4</h1>
 
@@ -7,18 +8,21 @@
     <p>Email crash info to insurance company</p>
 
     <div class="input-group">
-      <input type="text" class="form-control" value="{{crashEmailCtrl.person.agentEmail}}">
-      <a class="btn btn-success input-group-addon sendEmail" ng-click="crashEmailCtrl.sendEmail()">Send Email</a>
+      <input type="text" class="form-control" ng-model="crashEmailCtrl.insuranceAgentEmail">
+      <a class="btn btn-success input-group-addon sendEmail" ng-click="crashEmailCtrl.addEmail()">Add Email</a>
+
     </div>
     
   </form>
+
+  <!-- {{ crashEmailCtrl.insuranceAgentEmail }} -->
 
   <div class='bottomButtons'>
     <a href='#/crashDriverInfo'>
       <button class='btn btn-default pull-left back'>Back</button>
     </a>
     <a href='#/crashFinalInfo'>
-      <button class='btn btn-default pull-right next'>Next</button>
+      <button class='btn btn-default pull-right next' ng-click="crashEmailCtrl.save()">Next</button>
     </a>
   </div>
 

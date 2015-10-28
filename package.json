@@ -33,7 +33,8 @@
     "karma-chrome-launcher": "^0.2.1",
     "karma-jasmine": "^0.3.6",
     "mongoose": "^4.2.0",
-    "q": "^1.4.1"
+    "q": "^1.4.1",
+    "sendgrid": "^1.9.2"
   },
   "engines": {
     "node": "4.1.2"
