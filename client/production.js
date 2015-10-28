@@ -2,7 +2,6 @@ angular.module('crash', [
   'crash.eventService',
   'crash.userService',
   'crash.S3',
-  'crash.sendGrid',
   'crash.crashEventObj',
   'crash.profile',
   'crash.createAccount',
@@ -14,7 +13,8 @@ angular.module('crash', [
   'crash.crashDriverInfo',
   'crash.crashEmail',
   'crash.crashFinalInfo',
-  'ngRoute'
+  'ngRoute',
+  'ngCookies'
 ])
 .config(function($routeProvider, $httpProvider) {
 	$routeProvider
@@ -35,7 +35,7 @@ angular.module('crash', [
       }
     })
     .when('/signin', {
-      templateUrl: 'scripts/modules/user/signIn/signIn.html',
+      templateUrl: 'scripts/modules/user/signin/signIn.html',
       controller: 'SignInController',
       controllerAs : 'signInCtrl',
       data : {
@@ -98,6 +98,14 @@ angular.module('crash', [
         authenticate : true  
       }
     })
+    // .when('/authFacebook', {
+    //   templateUrl: 'scripts/modules/user/profile/profile.html',
+    //   controller: 'ProfileController',
+    //   controllerAs : 'profileCtrl',
+    //   data : {
+    //     authenticate : true  
+    //   }
+    // })
     .otherwise( {
       redirectTo: '/'
     });
@@ -128,9 +136,14 @@ angular.module('crash', [
 /***
   Everytime the route changes, check if the url data.authenticate property is true, check if a session token exists, otherwise redirect the user back to the sign in page
 ***/
-.run(function($rootScope, $location, UserService){
+.run(function($rootScope, $location, UserService, $window, $cookies){
 
   $rootScope.$on('$routeChangeStart', function(evt, next, current){
+
+    if(!!$cookies.get('token')) {
+      $window.localStorage.setItem('com.crash', $cookies.get('token'));
+    }
+
     if (next.$$route && next.data.authenticate && !UserService.isAuthorized()) {
       $location.path('/signin');
     }
@@ -147,7 +160,6 @@ angular.module('crash.crashEventObj', [])
 .service('CrashEventObj', function(){ 
 
   this.crashEvent = {};
-  
 
 });
 
@@ -221,46 +233,9 @@ angular.module('crash.S3', [])
 
 });
 
-angular.module('crash.sendGrid', [])
+angular.module('crash.userService', ['ngCookies'])
 
-  .factory('SendGridService', function($http){
-  
-  /***
-    Final Crash Object sent to SendGrid
-  ***/
-  
-    var sendEmail = function(crashObj){
-
-      console.log('in sendGrid service');
-
-      return $http({
-        method : 'POST',
-        url : 'api/sendGrid/sendEmail',
-        data : crashObj
-      })
-      .then(function(res){
-        return res.data;
-      });
-
-
-    };
-
-    return {
-
-      sendEmail : sendEmail
-
-    }
-
-
-
-
-  });
-
-
-
-angular.module('crash.userService', [])
-
-.factory('UserService', function($http, $window, $location){ 
+.factory('UserService', function($cookies, $http, $window, $location){ 
 
   /***
     url = 'api/user/signin' ($http send user obj) 
@@ -354,6 +329,8 @@ angular.module('crash.userService', [])
   ***/
   var signout = function(){
     $window.localStorage.clear();
+    $cookies.remove('token');
+    $cookies.remove('username');
     $location.path('/signin');
   };
 
@@ -433,57 +410,38 @@ angular.module('crash.crashDriverSearch', [])
 
 angular.module('crash.crashEmail', [])
 
-.controller('CrashEmailController', function(UserService, CrashEventObj) {
+.controller('CrashEmailController', function(UserService) {
   
   // Possibly in the future connect to any insurance API's...
 
   var self = this;
-  // self.person = {};
-  var userEmailAddresses = [];
-
-  self.insuranceAgentEmail = '';
+  self.person = {};
   /***
     get the username from window.localStorage
   ***/
-  // self.getUser = function(){
-  //   UserService.readAccount()
-  //     .then(function(user){
-  //       console.log('user : ', user);
-  //       self.person = user.data;
-  //     })
-  //     .catch(function(err){
-  //       console.log('user not received...', err);
-  //     });
-  // };
-
-/***
-    
-A note on UX: as it stands the save function ignores the last value in the form.  Make the save function smarter by checking the form for a value and making sure it is in the array before moving to the next view.
-
-***/
-
-  self.addEmail = function(){
-    
-    //on click store the value in the userEmailAddresses array
-    userEmailAddresses.push(self.insuranceAgentEmail);
-
-    //form value is cleared:
-    self.insuranceAgentEmail = '';
-
+  self.getUser = function(){
+    UserService.readAccount()
+      .then(function(user){
+        console.log('user : ', user);
+        self.person = user.data;
+      })
+      .catch(function(err){
+        console.log('user not received...', err);
+      });
   };
 
-  self.save = function(){
-    //adds the value as a property on the crash object:
-    CrashEventObj.crashEvent.userEmailAddresses = userEmailAddresses;
-    console.log(CrashEventObj.crashEvent.userEmailAddresses);
+  /***
+    send email to insurance company
+  ***/
+  self.sendEmail = function(){
+    
+  };
 
-  }
-  
 });
 
 angular.module('crash.crashFinalInfo', [])
 
-.controller('CrashFinalInfoController', function(CrashEventObj, EventService, SendGridService){
+.controller('CrashFinalInfoController', function(CrashEventObj, EventService){
   
   var self = this;
 
@@ -496,7 +454,7 @@ angular.module('crash.crashFinalInfo', [])
     load the crash obj that's been being built over the past screens, allow the user to change any details before sending the entire object to the database
   ***/
   self.loadCrashObj = function(){
-    console.log('CrashEventObj: ', CrashEventObj);
+    console.log('CrashEventObj : ', CrashEventObj);
 
     var crashObj = CrashEventObj.crashEvent;
 
@@ -516,16 +474,11 @@ angular.module('crash.crashFinalInfo', [])
 
   /***
     save the final crash object into the database, which will be added to the driver's crash history
-
-    this is also where the object is sent to the sendGrid factory...
   ***/
-  
   self.save = function(){
     console.log('save final information...');
 
     console.log('final crash object : ', self.finalCrashObj);
-//should send the final crashObj to the factory:
-    
 
     EventService.createCrashEvent(self.finalCrashObj)
       .then(function(data){
@@ -535,16 +488,6 @@ angular.module('crash.crashFinalInfo', [])
         console.log('error saving crash object...', err);
       });
 
-  };
-
-  self.sendGridEmail = function(){
-    SendGridService.sendEmail()
-      .then(function(data){
-        console.log('success : ', data);
-      })
-      .catch(function(err){
-        console.log('error : ', err);
-      });
   };
 
 });
@@ -637,7 +580,7 @@ angular.module('crash.crashPhoto', [])
 
 angular.module('crash.crashWitness', [])
 
-.controller('CrashWitnessController', function(CrashEventObj, SendGridService) {
+.controller('CrashWitnessController', function(CrashEventObj) {
   
   var self = this;
   self.witnessArr = [];
@@ -668,10 +611,6 @@ angular.module('crash.crashWitness', [])
     CrashEventObj.crashEvent.witnessArr = self.witnessArr;
   };
 
-  self.sendGrid = function(){
-    console.log('SEND GRID');
-  };
-
 });
 
 angular.module('crash.history', [])
@@ -699,13 +638,34 @@ angular.module('crash.history', [])
 
 });
 
-angular.module('crash.createAccount', [])
+angular.module('crash.createAccount', ['ngCookies'])
 
-.controller('CreateAccountController', function(UserService, $window, $location){
+.controller('CreateAccountController', function($cookies, UserService, $window, $location){
 
   var self = this;
   self.user = {};
   self.errorMessage = '';
+  var flag = false;
+
+  /***
+    get the username from cookies
+  ***/
+  self.getUser = function(){
+
+    UserService.getAccountByUsername($cookies.get('username'))
+      .then(function(user){
+        console.log('user : ', user);
+        self.user = user;
+        if(user) {
+          flag = true;
+        }
+        console.log('self.user : ', self.user);
+      })
+      .catch(function(err){
+        console.log('user not received...', err);
+      });
+  };
+
 
   /***
     send the new user to the server to be stored in the database
@@ -713,11 +673,16 @@ angular.module('crash.createAccount', [])
   ***/
   self.createAccount = function(){
     console.log('create account for user : ', self.user);
-    UserService.createAccount(self.user)
+    var promise;
+    if(!flag) {
+      promise = UserService.createAccount(self.user);
+    } else {
+      promise = UserService.updateUserAccount(self.user);
+    }
       /***
         response will be an {token:token, user:user}
       ***/
-      .then(function(data){
+    promise.then(function(data){
         console.log('created account, session :', data.token);
 
         $window.localStorage.setItem('com.crash', data.token);
@@ -793,9 +758,9 @@ angular.module('crash.profile', [])
 
 });
 
-angular.module('crash.signIn', [])
+angular.module('crash.signIn', ['ngCookies'])
 
-.controller('SignInController', function(UserService, $window, $location){
+.controller('SignInController', function($cookies, UserService, $window, $location){
   
   var self = this;
   self.errorMessage = '';
@@ -805,6 +770,7 @@ angular.module('crash.signIn', [])
     Pass the user object to the signin function which holds the username and password
     Sign the User In and get a session back from the server
   ***/
+
   self.signIn = function(){
     console.log('sign user in...');
     UserService.signin(self.user)
@@ -822,6 +788,30 @@ angular.module('crash.signIn', [])
         self.errorMessage = err.data.error;
         self.user.username = '';
         self.user.password = '';
+      });
+  };
+
+  // setInterval(function() {
+  //  var token = $cookies.get('token');
+  //  $window.localStorage.setItem('com.crash', token);
+  //       $location.path('/profile');   
+  //  console.log('Cookies Clinet', token);
+  // }, 5000);
+  // $window.localStorage.setItem('com.crash', token);
+  // $location.path('/profile');
+
+  self.signInFacebook = function() {
+    UserService.signinFacebook()
+      .then(function(data){
+        console.log('data', data);
+        $window.localStorage.setItem('com.crash', data.token);
+        $location.path('/profile');
+      })
+      .catch(function(err){
+        console.log('Error signing in the user ...', err.data);
+        // self.errorMessage = err.data.error;
+        // self.user.username = '';
+        // self.user.password = '';
       });
   };
   

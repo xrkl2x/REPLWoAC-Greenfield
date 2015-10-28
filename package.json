@@ -5,7 +5,7 @@
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postinstall": "./node_modules/bower/bin/bower install && grunt build",
+    "postinstall": "./node_modules/bower/bin/bower install && grunt launch",
     "start": "node ./server/server.js"
   },
   "author": "",
@@ -15,8 +15,10 @@
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.14.1",
     "bower": "^1.6.3",
+    "cookie-parser": "^1.4.0",
     "expect.js": "^0.3.1",
     "express": "^4.13.3",
+    "express-session": "^1.12.0",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
@@ -34,7 +36,9 @@
     "karma-jasmine": "^0.3.6",
     "mongoose": "^4.2.0",
     "q": "^1.4.1",
-    "sendgrid": "^1.9.2"
+    "sendgrid": "^1.9.2",
+    "passport": "^0.3.0",
+    "passport-facebook": "^2.0.0"
   },
   "engines": {
     "node": "4.1.2"

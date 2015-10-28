@@ -1,6 +1,6 @@
-angular.module('crash.userService', [])
+angular.module('crash.userService', ['ngCookies'])
 
-.factory('UserService', function($http, $window, $location){ 
+.factory('UserService', function($cookies, $http, $window, $location){ 
 
   /***
     url = 'api/user/signin' ($http send user obj) 
@@ -94,6 +94,8 @@ angular.module('crash.userService', [])
   ***/
   var signout = function(){
     $window.localStorage.clear();
+    $cookies.remove('token');
+    $cookies.remove('username');
     $location.path('/signin');
   };
 

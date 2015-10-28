@@ -11,9 +11,9 @@ var jwt = require('jwt-simple');
   Decode the token that was attached to the call's headers as 'x-access-token',
   then attach the decoded user object to the request object
 ***/
-
+ 
 module.exports = {
-
+ 
   decode : function(req, res, next){
     var token = req.headers['x-access-token'];
 

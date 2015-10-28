@@ -1,10 +1,31 @@
-angular.module('crash.createAccount', [])
+angular.module('crash.createAccount', ['ngCookies'])
 
-.controller('CreateAccountController', function(UserService, $window, $location){
+.controller('CreateAccountController', function($cookies, UserService, $window, $location){
 
   var self = this;
   self.user = {};
   self.errorMessage = '';
+  var flag = false;
+
+  /***
+    get the username from cookies
+  ***/
+  self.getUser = function(){
+
+    UserService.getAccountByUsername($cookies.get('username'))
+      .then(function(user){
+        console.log('user : ', user);
+        self.user = user;
+        if(user) {
+          flag = true;
+        }
+        console.log('self.user : ', self.user);
+      })
+      .catch(function(err){
+        console.log('user not received...', err);
+      });
+  };
+
 
   /***
     send the new user to the server to be stored in the database
@@ -12,11 +33,16 @@ angular.module('crash.createAccount', [])
   ***/
   self.createAccount = function(){
     console.log('create account for user : ', self.user);
-    UserService.createAccount(self.user)
+    var promise;
+    if(!flag) {
+      promise = UserService.createAccount(self.user);
+    } else {
+      promise = UserService.updateUserAccount(self.user);
+    }
       /***
         response will be an {token:token, user:user}
       ***/
-      .then(function(data){
+    promise.then(function(data){
         console.log('created account, session :', data.token);
 
         $window.localStorage.setItem('com.crash', data.token);

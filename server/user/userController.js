@@ -10,6 +10,9 @@ var User = require('./userModel.js');
     Utils = require('../config/utility.js');
     Q = require('q');
     jwt = require('jwt-simple');
+    express = require('express');
+    passport = require('passport');
+    session = require('express-session');
 
 module.exports = {
 
