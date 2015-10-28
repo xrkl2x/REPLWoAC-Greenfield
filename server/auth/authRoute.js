@@ -10,9 +10,9 @@ var express = require('express')
   , jwt = require('jwt-simple')
   , User = require('../user/userModel.js');
 
-var FACEBOOK_APP_ID = '727643380674076';
-var FACEBOOK_APP_SECRET = '82696b2b0432b1f59fbef854f6774854';
-
+var FACEBOOK_APP_ID = '728226420615772';
+var FACEBOOK_APP_SECRET = 'f527135a3ac95573c1451981e3ec0807';
+var firstTimeUser = false;
 // var APP_ID = '119177148950-g88jtbakr8tflt6i8acqjfiseeq47e9h.apps.googleusercontent.com';
 // var APP_SECRET = 'xH48HGx2NL8MaeioArlI0QQx';
 
@@ -52,11 +52,9 @@ passport.use(new FacebookStrategy({
     // asynchronous verification, for effect...
     process.nextTick(function () {
       
-      // To keep the example simple, the user's Facebook profile is returned to
-      // represent the logged-in user.  In a typical application, you would want
+      // In a typical application, you would want
       // to associate the Facebook account with a user record in your database,
       // and return that user instead.
-      console.log('profile',profile);
 
       var fineOne = Q.nbind(User.findOne, User);
       var create = Q.nbind(User.create, User);
@@ -70,14 +68,16 @@ passport.use(new FacebookStrategy({
               username : profile.name.givenName,
               password : profile.id
             };
+            firstTimeUser = true;
             return create(newUser);
           } else {
+            firstTimeUser = false;
             return user;
           }
         })
       .then(function(newUserCreated) {
         token = jwt.encode(newUserCreated, 'secret');
-        return done(null, token);       
+        return done(null, {username: newUserCreated.username, token: token});       
       })
       .catch(function(err) {
         console.log('error created the user...', err);
@@ -112,12 +112,15 @@ passport.use(new FacebookStrategy({
   app.get('/facebook/callback', 
     passport.authenticate('facebook'),
     function(req, res) {
-      console.log('I am a req.session', req.session);
-      console.log('Cookies Before', req.cookies);
-      res.cookie('token', req.session.passport.user);
-
+      res.cookie('token', req.session.passport.user.token);
+      res.cookie('username', req.session.passport.user.username);      
       // res.json({token : req.session.passport.user});
-      res.redirect('/#/createAccount');
+      if(firstTimeUser) {
+        res.redirect('/#/createAccount');
+      } else {
+        res.redirect('/#/');
+      }
+
     });
 
 

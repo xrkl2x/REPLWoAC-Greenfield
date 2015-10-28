@@ -99,14 +99,14 @@ angular.module('crash', [
         authenticate : true  
       }
     })
-    .when('/authFacebook', {
-      templateUrl: 'scripts/modules/user/profile/profile.html',
-      controller: 'ProfileController',
-      controllerAs : 'profileCtrl',
-      data : {
-        authenticate : true  
-      }
-    })
+    // .when('/authFacebook', {
+    //   templateUrl: 'scripts/modules/user/profile/profile.html',
+    //   controller: 'ProfileController',
+    //   controllerAs : 'profileCtrl',
+    //   data : {
+    //     authenticate : true  
+    //   }
+    // })
     .otherwise( {
       redirectTo: '/'
     });
@@ -137,9 +137,14 @@ angular.module('crash', [
 /***
   Everytime the route changes, check if the url data.authenticate property is true, check if a session token exists, otherwise redirect the user back to the sign in page
 ***/
-.run(function($rootScope, $location, UserService){
+.run(function($rootScope, $location, UserService, $window, $cookies){
 
   $rootScope.$on('$routeChangeStart', function(evt, next, current){
+
+    if(!!$cookies.get('token')) {
+      $window.localStorage.setItem('com.crash', $cookies.get('token'));
+    }
+
     if (next.$$route && next.data.authenticate && !UserService.isAuthorized()) {
       $location.path('/signin');
     }

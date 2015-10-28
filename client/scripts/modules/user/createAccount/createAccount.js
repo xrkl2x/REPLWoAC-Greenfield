@@ -1,6 +1,6 @@
-angular.module('crash.createAccount', [])
+angular.module('crash.createAccount', ['ngCookies'])
 
-.controller('CreateAccountController', function(UserService, $window, $location){
+.controller('CreateAccountController', function($cookies, UserService, $window, $location){
 
   var self = this;
   self.user = {};
@@ -8,11 +8,11 @@ angular.module('crash.createAccount', [])
   var flag = false;
 
   /***
-    get the username from window.localStorage
+    get the username from cookies
   ***/
   self.getUser = function(){
 
-    UserService.getAccountByUsername('Jia')
+    UserService.getAccountByUsername($cookies.get('username'))
       .then(function(user){
         console.log('user : ', user);
         self.user = user;

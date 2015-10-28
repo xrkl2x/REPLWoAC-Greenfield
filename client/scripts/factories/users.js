@@ -1,6 +1,6 @@
-angular.module('crash.userService', [])
+angular.module('crash.userService', ['ngCookies'])
 
-.factory('UserService', function($http, $window, $location){ 
+.factory('UserService', function($cookies, $http, $window, $location){ 
 
   /***
     url = 'api/user/signin' ($http send user obj) 
@@ -12,21 +12,6 @@ angular.module('crash.userService', [])
       method : 'POST',
       url : 'api/user/signin',
       data : userObj
-    })
-    .then(function(res){
-      return res.data;
-    });
-  };
-
-  /***
-    url = 'api/user/signinFacebook' ($http send user obj) 
-    return from server
-      success or failure
-  ***/
-  var signinFacebook = function(){
-    return $http({
-      method : 'GET',
-      url : 'api/auth/facebook',
     })
     .then(function(res){
       return res.data;
@@ -109,12 +94,13 @@ angular.module('crash.userService', [])
   ***/
   var signout = function(){
     $window.localStorage.clear();
+    $cookies.remove('token');
+    $cookies.remove('username');
     $location.path('/signin');
   };
 
   return {
     signin : signin,
-    signinFacebook: signinFacebook,
     createAccount : createAccount,
     updateUserAccount: updateUserAccount,
     readAccount : readAccount,

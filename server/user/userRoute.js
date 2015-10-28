@@ -19,6 +19,4 @@ module.exports = function(app){
   app.post('/create', userController.createAccount);
 
   app.post('/updateuser', userController.updateUser);  // TODO: after MVP
-
-  app.post('/signinFacebook', userController.signinFacebook);
 };
