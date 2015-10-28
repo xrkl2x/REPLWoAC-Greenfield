@@ -36,7 +36,7 @@ angular.module('crash', [
       }
     })
     .when('/signin', {
-      templateUrl: 'scripts/modules/user/signIn/signIn.html',
+      templateUrl: 'scripts/modules/user/signin/signIn.html',
       controller: 'SignInController',
       controllerAs : 'signInCtrl',
       data : {
