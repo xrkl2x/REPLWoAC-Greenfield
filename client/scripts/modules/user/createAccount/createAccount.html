@@ -10,13 +10,13 @@
     <form name='createAccountCtrl.createAccountForm'>
 
         <!-- Future, should be able to take photos of everything to get the same information -->
-        <input ng-show="!createAccountCtrl.user" type="text" class="form-control" ng-model="createAccountCtrl.user.username">
+        <input ng-show="!createAccountCtrl.user.username" type="text" class="form-control" placeholder="username" ng-model="createAccountCtrl.user.username">
 
-        <input ng-show="!createAccountCtrl.user" type="password" class="form-control" placeholder="Password" ng-model="createAccountCtrl.user.password">
+        <input ng-show="!createAccountCtrl.user.username" type="password" class="form-control" placeholder="Password" ng-model="createAccountCtrl.user.password">
 
-        <input type="text" class="form-control" ng-model="createAccountCtrl.user.firstName">
+        <input type="text" class="form-control" placeholder="First Name" ng-model="createAccountCtrl.user.firstName">
 
-        <input type="text" class="form-control" ng-model="createAccountCtrl.user.lastName">
+        <input type="text" class="form-control" placeholder="Last Name" ng-model="createAccountCtrl.user.lastName">
 
         <input type="date" class="form-control" placeholder="DOB" ng-model="createAccountCtrl.user.dob">
 

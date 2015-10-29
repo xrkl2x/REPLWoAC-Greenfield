@@ -10,8 +10,8 @@ var express = require('express')
   , jwt = require('jwt-simple')
   , User = require('../user/userModel.js');
 
-var FACEBOOK_APP_ID = '728226420615772';
-var FACEBOOK_APP_SECRET = 'f527135a3ac95573c1451981e3ec0807';
+var FACEBOOK_APP_ID = '456658017851875';
+var FACEBOOK_APP_SECRET = '102894a7151b509f16ebd6acc17be13b';
 var firstTimeUser = false;
 // var APP_ID = '119177148950-g88jtbakr8tflt6i8acqjfiseeq47e9h.apps.googleusercontent.com';
 // var APP_SECRET = 'xH48HGx2NL8MaeioArlI0QQx';
@@ -112,6 +112,7 @@ passport.use(new FacebookStrategy({
   app.get('/facebook/callback', 
     passport.authenticate('facebook'),
     function(req, res) {
+      console.log('HEEEEEEEEEEEEEEELLLLLO');
       res.cookie('token', req.session.passport.user.token);
       res.cookie('username', req.session.passport.user.username);      
       // res.json({token : req.session.passport.user});

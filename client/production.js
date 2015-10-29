@@ -2,6 +2,7 @@ angular.module('crash', [
   'crash.eventService',
   'crash.userService',
   'crash.S3',
+  'crash.sendGrid',
   'crash.crashEventObj',
   'crash.profile',
   'crash.createAccount',
@@ -160,6 +161,7 @@ angular.module('crash.crashEventObj', [])
 .service('CrashEventObj', function(){ 
 
   this.crashEvent = {};
+  
 
 });
 
@@ -232,6 +234,43 @@ angular.module('crash.S3', [])
   };
 
 });
+
+angular.module('crash.sendGrid', [])
+
+  .factory('SendGridService', function($http){
+  
+  /***
+    Final Crash Object sent to SendGrid
+  ***/
+  
+    var sendEmail = function(crashObj){
+
+      console.log('in sendGrid service');
+
+      return $http({
+        method : 'POST',
+        url : 'api/sendGrid/sendEmail',
+        data : crashObj
+      })
+      .then(function(res){
+        return res.data;
+      });
+
+
+    };
+
+    return {
+
+      sendEmail : sendEmail
+
+    }
+
+
+
+
+  });
+
+
 
 angular.module('crash.userService', ['ngCookies'])
 
@@ -410,38 +449,57 @@ angular.module('crash.crashDriverSearch', [])
 
 angular.module('crash.crashEmail', [])
 
-.controller('CrashEmailController', function(UserService) {
+.controller('CrashEmailController', function(UserService, CrashEventObj) {
   
   // Possibly in the future connect to any insurance API's...
 
   var self = this;
-  self.person = {};
+  // self.person = {};
+  var userEmailAddresses = [];
+
+  self.insuranceAgentEmail = '';
   /***
     get the username from window.localStorage
   ***/
-  self.getUser = function(){
-    UserService.readAccount()
-      .then(function(user){
-        console.log('user : ', user);
-        self.person = user.data;
-      })
-      .catch(function(err){
-        console.log('user not received...', err);
-      });
-  };
+  // self.getUser = function(){
+  //   UserService.readAccount()
+  //     .then(function(user){
+  //       console.log('user : ', user);
+  //       self.person = user.data;
+  //     })
+  //     .catch(function(err){
+  //       console.log('user not received...', err);
+  //     });
+  // };
 
-  /***
-    send email to insurance company
-  ***/
-  self.sendEmail = function(){
+/***
     
+A note on UX: as it stands the save function ignores the last value in the form.  Make the save function smarter by checking the form for a value and making sure it is in the array before moving to the next view.
+
+***/
+
+  self.addEmail = function(){
+    
+    //on click store the value in the userEmailAddresses array
+    userEmailAddresses.push(self.insuranceAgentEmail);
+
+    //form value is cleared:
+    self.insuranceAgentEmail = '';
+
   };
 
+  self.save = function(){
+    //adds the value as a property on the crash object:
+    CrashEventObj.crashEvent.userEmailAddresses = userEmailAddresses;
+    console.log(CrashEventObj.crashEvent.userEmailAddresses);
+
+  }
+  
 });
 
 angular.module('crash.crashFinalInfo', [])
 
-.controller('CrashFinalInfoController', function(CrashEventObj, EventService){
+.controller('CrashFinalInfoController', function(CrashEventObj, EventService, SendGridService){
   
   var self = this;
 
@@ -454,7 +512,7 @@ angular.module('crash.crashFinalInfo', [])
     load the crash obj that's been being built over the past screens, allow the user to change any details before sending the entire object to the database
   ***/
   self.loadCrashObj = function(){
-    console.log('CrashEventObj : ', CrashEventObj);
+    console.log('CrashEventObj: ', CrashEventObj);
 
     var crashObj = CrashEventObj.crashEvent;
 
@@ -474,11 +532,16 @@ angular.module('crash.crashFinalInfo', [])
 
   /***
     save the final crash object into the database, which will be added to the driver's crash history
+
+    this is also where the object is sent to the sendGrid factory...
   ***/
+  
   self.save = function(){
     console.log('save final information...');
 
     console.log('final crash object : ', self.finalCrashObj);
+//should send the final crashObj to the factory:
+    
 
     EventService.createCrashEvent(self.finalCrashObj)
       .then(function(data){
@@ -488,6 +551,16 @@ angular.module('crash.crashFinalInfo', [])
         console.log('error saving crash object...', err);
       });
 
+  };
+
+  self.sendGridEmail = function(){
+    SendGridService.sendEmail()
+      .then(function(data){
+        console.log('success : ', data);
+      })
+      .catch(function(err){
+        console.log('error : ', err);
+      });
   };
 
 });
@@ -580,7 +653,7 @@ angular.module('crash.crashPhoto', [])
 
 angular.module('crash.crashWitness', [])
 
-.controller('CrashWitnessController', function(CrashEventObj) {
+.controller('CrashWitnessController', function(CrashEventObj, SendGridService) {
   
   var self = this;
   self.witnessArr = [];
@@ -609,6 +682,10 @@ angular.module('crash.crashWitness', [])
   self.save = function(){
     console.log('saving...');
     CrashEventObj.crashEvent.witnessArr = self.witnessArr;
+  };
+
+  self.sendGrid = function(){
+    console.log('SEND GRID');
   };
 
 });
@@ -655,8 +732,9 @@ angular.module('crash.createAccount', ['ngCookies'])
     UserService.getAccountByUsername($cookies.get('username'))
       .then(function(user){
         console.log('user : ', user);
-        self.user = user;
+        
         if(user) {
+          self.user = user;
           flag = true;
         }
         console.log('self.user : ', self.user);

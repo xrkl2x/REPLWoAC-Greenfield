@@ -15,8 +15,9 @@ angular.module('crash.createAccount', ['ngCookies'])
     UserService.getAccountByUsername($cookies.get('username'))
       .then(function(user){
         console.log('user : ', user);
-        self.user = user;
+        
         if(user) {
+          self.user = user;
           flag = true;
         }
         console.log('self.user : ', self.user);
