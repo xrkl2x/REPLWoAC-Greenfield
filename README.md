@@ -2,9 +2,9 @@
 
 REPL Team Greenfield Project
 
-Project Lead: Jordan Winkelman
-Scrum Master: Jia Li
-Developers: Cyrus Gomez, Stephen Donahue, Royce Leung
+Project Lead: Jordan Winkelman  
+Scrum Master: Jia Li  
+Developers: Cyrus Gomez, Stephen Donahue, Royce Leung  
 
 ## Summary
 
